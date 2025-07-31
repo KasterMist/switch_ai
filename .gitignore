@@ -1,0 +1,48 @@
+# 配置文件
+load_config.cmake
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.mypy_cache/
+
+# 构建目录
+build/
+dist/
+*.egg-info/
+
+# 模型文件和数据
+/model/
+/train_data/
+/test_data/
+
+# 日志文件
+/log/
+*.log
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 环境文件
+.env
+.venv
+env/
+venv/
+ENV/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 临时文件
+*.tmp
+*.temp
