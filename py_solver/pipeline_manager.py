@@ -522,30 +522,30 @@ class PipelineManager:
         # Compute normalization parameters for targets
         if self.config.mix_norm:
             if self.config.norm_type == "standardization":
-                input_mean = np.mean(inputs)
-                input_std = np.std(inputs)
-                target_mean = np.mean(outputs)
-                target_std = np.std(outputs)
+                input_mean = np.mean(inputs, axis=0)
+                input_std = np.std(inputs, axis=0)
+                target_mean = np.mean(outputs, axis=0)
+                target_std = np.std(outputs, axis=0)
                 # Create StandardizationInfo object
                 from py_solver.config import StandardizationInfo
                 self.config.norm_info = StandardizationInfo(
-                    input_mean=float(input_mean),
-                    input_std=float(input_std),
-                    target_mean=float(target_mean),
-                    target_std=float(target_std)
+                    input_mean=input_mean.tolist(),
+                    input_std=input_std.tolist(),
+                    target_mean=target_mean.tolist() if target_mean.size > 1 else float(target_mean),
+                    target_std=target_std.tolist() if target_std.size > 1 else float(target_std)
                 )
             elif self.config.norm_type == "min_max":
-                input_min = np.min(inputs)
-                input_max = np.max(inputs)
-                target_min = np.min(outputs)
-                target_max = np.max(outputs)
+                input_min = np.min(inputs, axis=0)
+                input_max = np.max(inputs, axis=0)
+                target_min = np.min(outputs, axis=0)
+                target_max = np.max(outputs, axis=0)
                 # Create MinMaxNormInfo object
                 from py_solver.config import MinMaxNormInfo
                 self.config.norm_info = MinMaxNormInfo(
-                    input_min=float(input_min),
-                    input_max=float(input_max),
-                    target_min=float(target_min),
-                    target_max=float(target_max)
+                    input_min=input_min.tolist(),
+                    input_max=input_max.tolist(),
+                    target_min=target_min.tolist() if target_min.size > 1 else float(target_min),
+                    target_max=target_max.tolist() if target_max.size > 1 else float(target_max)
                 )
         else:
             raise NotImplementedError("Mix norm setting false logic is not implemented")

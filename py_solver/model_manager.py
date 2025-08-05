@@ -32,7 +32,7 @@ class ModelManager:
         self.base_save_dir.mkdir(exist_ok=True)
         
         # Model registry for tracking saved models
-        self.model_registry = {}
+        self.model_registry: Dict[str, Dict[str, Any]] = {}
         self._load_registry()
     
     def _load_registry(self):
@@ -105,6 +105,27 @@ class ModelManager:
         
         # Prepare metadata
         timestamp = time.strftime("%Y%m%d_%H%M%S")
+        
+        # Convert norm_info to serializable format
+        norm_info_data = None
+        if config.norm_info is not None:
+            if config.norm_type == "standardization":
+                norm_info_data = {
+                    'type': 'standardization',
+                    'input_mean': config.norm_info.input_mean,
+                    'input_std': config.norm_info.input_std,
+                    'target_mean': float(config.norm_info.target_mean) if config.norm_info.target_mean is not None else None,
+                    'target_std': float(config.norm_info.target_std) if config.norm_info.target_std is not None else None
+                }
+            elif config.norm_type == "min_max":
+                norm_info_data = {
+                    'type': 'min_max',
+                    'input_min': config.norm_info.input_min,
+                    'input_max': config.norm_info.input_max,
+                    'target_min': float(config.norm_info.target_min) if config.norm_info.target_min is not None else None,
+                    'target_max': float(config.norm_info.target_max) if config.norm_info.target_max is not None else None
+                }
+        
         model_metadata = {
             'model_name': model_name,
             'version': version_name,
@@ -117,6 +138,7 @@ class ModelManager:
                 'dropout_prob': config.dropout_prob,
                 'model_type': config.model_type.value,
                 'norm_type': config.norm_type,
+                'norm_info': norm_info_data,
                 'activation': config.activation,
                 'mix_norm': config.mix_norm
             },
@@ -182,16 +204,16 @@ class ModelManager:
                     'type': 'standardization',
                     'input_mean': model.norm_info.input_mean,
                     'input_std': model.norm_info.input_std,
-                    'target_mean': model.norm_info.target_mean,
-                    'target_std': model.norm_info.target_std
+                    'target_mean': float(model.norm_info.target_mean) if model.norm_info.target_mean is not None else None,
+                    'target_std': float(model.norm_info.target_std) if model.norm_info.target_std is not None else None
                 }
             elif model.norm_type == "min_max":
                 norm_info_data = {
                     'type': 'min_max',
                     'input_min': model.norm_info.input_min,
                     'input_max': model.norm_info.input_max,
-                    'target_min': model.norm_info.target_min,
-                    'target_max': model.norm_info.target_max
+                    'target_min': float(model.norm_info.target_min) if model.norm_info.target_min is not None else None,
+                    'target_max': float(model.norm_info.target_max) if model.norm_info.target_max is not None else None
                 }
         
         # Save the model
@@ -212,7 +234,7 @@ class ModelManager:
         
         torch.onnx.export(
             model,
-            dummy_input,
+            (dummy_input,),
             save_path,
             export_params=True,
             opset_version=11,
@@ -247,10 +269,10 @@ class ModelManager:
         
         # Load checkpoint
         checkpoint = torch.load(pt_path, map_location=device)
-        model_config = checkpoint['model_config']
+        saved_model_config = checkpoint['model_config']
         
         # Restore norm_info
-        norm_info = None
+        norm_info: Optional[Union[StandardizationInfo, MinMaxNormInfo]] = None
         if 'norm_info_data' in checkpoint and checkpoint['norm_info_data'] is not None:
             norm_info_data = checkpoint['norm_info_data']
             if norm_info_data['type'] == 'standardization':
@@ -270,14 +292,14 @@ class ModelManager:
         
         # Create config object for model creation
         config = model_config(
-            input_dim=model_config['input_dim'],
-            output_dim=model_config['output_dim'],
-            base_neurons=model_config['base_neurons'],
-            dropout_prob=model_config['dropout_prob'],
-            model_type=model_config['model_type'],
-            norm_type=model_config['norm_type'],
-            activation=model_config['activation'],
-            mix_norm=model_config['mix_norm'],
+            input_dim=saved_model_config['input_dim'],
+            output_dim=saved_model_config['output_dim'],
+            base_neurons=saved_model_config['base_neurons'],
+            dropout_prob=saved_model_config['dropout_prob'],
+            model_type=saved_model_config['model_type'],
+            norm_type=saved_model_config['norm_type'],
+            activation=saved_model_config['activation'],
+            mix_norm=saved_model_config['mix_norm'],
             norm_info=norm_info
         )
         

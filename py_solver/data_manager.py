@@ -283,8 +283,8 @@ class DataManager:
             return MinMaxNormInfo(
                 input_min=self.input_min.tolist(),
                 input_max=self.input_max.tolist(),
-                target_min=self.target_min.tolist() if self.output_dim > 1 else float(self.target_min[0]),
-                target_max=self.target_max.tolist() if self.output_dim > 1 else float(self.target_max[0])
+                target_min=self.target_min.tolist(),
+                target_max=self.target_max.tolist()
             )
         else:
             raise ValueError(f"Unsupported normalization type: {self.config.norm_type}")

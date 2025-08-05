@@ -301,17 +301,17 @@ class FlexibleDNN(nn.Module):
     def get_norm_info(self):
         if self.norm_type == "standardization":
             return StandardizationInfo(
-                input_mean=self.input_mean,
-                input_std=self.input_std,
-                target_mean=self.target_mean,
-                target_std=self.target_std
+                input_mean=self.input_mean.cpu().numpy().tolist() if self.input_mean is not None else None,
+                input_std=self.input_std.cpu().numpy().tolist() if self.input_std is not None else None,
+                target_mean=float(self.target_mean.cpu().numpy()) if self.target_mean is not None else None,
+                target_std=float(self.target_std.cpu().numpy()) if self.target_std is not None else None
             )
         elif self.norm_type == "min_max":   
             return MinMaxNormInfo(
-                input_min=self.input_min,
-                input_max=self.input_max,
-                target_min=self.target_min,
-                target_max=self.target_max
+                input_min=self.input_min.cpu().numpy().tolist() if self.input_min is not None else None,
+                input_max=self.input_max.cpu().numpy().tolist() if self.input_max is not None else None,
+                target_min=float(self.target_min.cpu().numpy()) if self.target_min is not None else None,
+                target_max=float(self.target_max.cpu().numpy()) if self.target_max is not None else None
             )
         else:
             return None

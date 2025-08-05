@@ -31,4 +31,8 @@ def launch_python_training_in_terminal(csv_path):
     features, targets = data_manager._read_single_csv(csv_path)
     inputs = features
     outputs = targets 
-    cplusplus_launch_python_training(config, inputs, outputs, "models/terminal_model", "test_model")
+    cplusplus_launch_python_training(config, inputs, outputs, "", "online-model")
+
+
+if __name__ == "__main__":
+    launch_python_training_in_terminal("tmp_train_data.csv")

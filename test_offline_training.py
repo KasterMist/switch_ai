@@ -55,7 +55,8 @@ def test_offline_training():
     
     # Create test CSV file
     # csv_path = create_test_csv()
-    csv_path = ["train_data/training_poisson_data_RPM500.csv", "train_data/training_poisson_data_RPM1000.csv"]
+    csv_path = "train_data/training_poisson_data_RPM1000.csv"
+    # csv_path = ["train_data/training_poisson_data_RPM500.csv", "train_data/training_poisson_data_RPM1000.csv"]
     
     # Create configuration
     config = model_config(
@@ -63,7 +64,7 @@ def test_offline_training():
         output_dim=1,
         base_neurons=16,
         norm_type="standardization",
-        activation="relu",
+        activation="exp_decay",
         mix_norm=True
     )
     
